@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImage from "@/assets/hero-fashion.jpg";
-import { supabase } from "@/lib/supabase";
+import { lovable } from "@/integrations/lovable/index";
 import { ArrowRight, Mail } from "lucide-react";
 
 export default function Welcome() {
@@ -35,10 +35,25 @@ export default function Welcome() {
   };
 
   const handleGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin },
-    });
+    setError("");
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        setError(result.error.message || "Google sign-in failed");
+        return;
+      }
+      if (result.redirected) {
+        return;
+      }
+      navigate("/");
+    } catch (err: any) {
+      setError(err.message || "Google sign-in failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGuest = () => {
@@ -62,6 +77,10 @@ export default function Welcome() {
               </Button>
               <Button onClick={() => setMode("signup")} className="w-full justify-between" variant="outline">
                 Create Account <ArrowRight className="w-4 h-4" />
+              </Button>
+              <Button onClick={handleGoogle} variant="outline" className="w-full justify-between">
+                <span className="flex items-center gap-2"><Mail className="w-4 h-4" /> Continue with Google</span>
+                <ArrowRight className="w-4 h-4" />
               </Button>
               <button
                 onClick={handleGuest}
@@ -116,7 +135,7 @@ export default function Welcome() {
           <span className="font-mono text-[10px] text-muted-foreground">OR</span>
           <div className="flex-1 border-t" />
         </div>
-        <Button onClick={handleGoogle} variant="outline" className="w-full mt-4 h-11">
+        <Button onClick={handleGoogle} variant="outline" className="w-full mt-4 h-11" disabled={loading}>
           <Mail className="w-4 h-4 mr-2" /> Continue with Google
         </Button>
         <p className="text-center mt-6 text-sm text-muted-foreground">

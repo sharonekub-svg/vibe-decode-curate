@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { StyleItem } from "@/data/items";
-import { Heart, X } from "lucide-react";
+import { Heart, X, ThumbsUp, ThumbsDown } from "lucide-react";
 
 interface SwipeCardProps {
   item: StyleItem;
@@ -48,6 +48,8 @@ export function SwipeCard({ item, onSwipeRight, onSwipeLeft, isTop }: SwipeCardP
 
   const rotation = offset * 0.08;
   const opacity = Math.max(0, 1 - Math.abs(offset) / 400);
+  const likeOpacity = Math.min(1, Math.max(0, offset / 120));
+  const nopeOpacity = Math.min(1, Math.max(0, -offset / 120));
 
   return (
     <div
@@ -66,20 +68,33 @@ export function SwipeCard({ item, onSwipeRight, onSwipeLeft, isTop }: SwipeCardP
       onTouchMove={(e) => handleMove(e.touches[0].clientX)}
       onTouchEnd={handleEnd}
     >
-      <div className="h-full w-full rounded-lg border bg-card overflow-hidden flex flex-col cursor-grab active:cursor-grabbing select-none">
+      <div className="h-full w-full rounded-lg border bg-card overflow-hidden flex flex-col cursor-grab active:cursor-grabbing select-none relative">
+        {/* Full-card overlay feedback */}
+        <div
+          className="absolute inset-0 z-20 pointer-events-none rounded-lg transition-opacity duration-150 flex items-center justify-center"
+          style={{ backgroundColor: "hsl(var(--accent) / 0.15)", opacity: likeOpacity }}
+        >
+          {likeOpacity > 0.1 && (
+            <div className="flex flex-col items-center gap-2 animate-scale-in">
+              <ThumbsUp className="w-16 h-16 text-accent" strokeWidth={2.5} />
+              <span className="font-mono text-lg font-bold tracking-wider text-accent">VIBE IT</span>
+            </div>
+          )}
+        </div>
+        <div
+          className="absolute inset-0 z-20 pointer-events-none rounded-lg transition-opacity duration-150 flex items-center justify-center"
+          style={{ backgroundColor: "hsl(var(--destructive) / 0.15)", opacity: nopeOpacity }}
+        >
+          {nopeOpacity > 0.1 && (
+            <div className="flex flex-col items-center gap-2 animate-scale-in">
+              <ThumbsDown className="w-16 h-16 text-destructive" strokeWidth={2.5} />
+              <span className="font-mono text-lg font-bold tracking-wider text-destructive">DROP IT</span>
+            </div>
+          )}
+        </div>
+
         <div className="relative flex-1 overflow-hidden">
           <img src={item.image} alt={item.name} className="h-full w-full object-cover" draggable={false} />
-          {/* Swipe indicators */}
-          {offset > 50 && (
-            <div className="absolute top-6 left-6 rounded-sm border-2 border-accent bg-accent/10 px-4 py-2">
-              <span className="font-mono text-sm font-medium text-accent">VIBE IT</span>
-            </div>
-          )}
-          {offset < -50 && (
-            <div className="absolute top-6 right-6 rounded-sm border-2 border-destructive bg-destructive/10 px-4 py-2">
-              <span className="font-mono text-sm font-medium text-destructive">DROP IT</span>
-            </div>
-          )}
         </div>
         <div className="p-4 border-t">
           <div className="flex items-center justify-between">
@@ -99,14 +114,14 @@ export function SwipeCard({ item, onSwipeRight, onSwipeLeft, isTop }: SwipeCardP
           <div className="flex border-t">
             <button
               onClick={(e) => { e.stopPropagation(); handleButtonSwipe("left"); }}
-              className="flex-1 flex items-center justify-center gap-2 py-3 text-muted-foreground hover:bg-secondary transition-colors border-r"
+              className="flex-1 flex items-center justify-center gap-2 py-3 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors border-r"
             >
               <X className="w-4 h-4" />
               <span className="font-mono text-xs">DROP</span>
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); handleButtonSwipe("right"); }}
-              className="flex-1 flex items-center justify-center gap-2 py-3 text-accent hover:bg-secondary transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-3 text-accent hover:bg-accent/10 transition-colors"
             >
               <Heart className="w-4 h-4" />
               <span className="font-mono text-xs">VIBE</span>
