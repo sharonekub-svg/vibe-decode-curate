@@ -155,3 +155,4 @@ export const styleItems: StyleItem[] = [
   { id: "104", name: "Mini Backpack",        brand: "AMAZON",            price: 30,  image: img(4),  category: "accessories", aesthetic: "Y2K",        fit: "One Size",  gender: "unisex", affiliateUrl: "https://www.amazon.com/s?k=mini+backpack&tag=YOUR_AMAZON_TAG" },
   { id: "105", name: "Vintage Denim Jacket", brand: "LEVI'S",            price: 89,  image: img(5),  category: "outerwear",   aesthetic: "Vintage",    fit: "Regular",   gender: "unisex", affiliateUrl: "https://www.levi.com/US/en_US/clothing/unisex/jackets" },
 ];
+  
