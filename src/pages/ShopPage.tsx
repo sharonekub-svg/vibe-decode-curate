@@ -1,25 +1,35 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useVibe } from "@/contexts/VibeContext";
 import { styleItems } from "@/data/items";
 import { Share2, ExternalLink } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 
-const categories = ["All", "Tops", "Bottoms", "Kicks", "Accessories", "Outerwear"];
+const categories = ["All", "Tops", "Bottoms", "Kicks", "Accessories", "Outerwear", "Dresses"];
 const priceSteps = [25, 50, 100, 150, 200, 500];
+type GenderFilter = "all" | "male" | "female";
 
 export default function ShopPage() {
   const [category, setCategory] = useState("All");
   const [priceIdx, setPriceIdx] = useState(priceSteps.length - 1);
-  const { vibeProfile } = useVibe();
+  const { vibeProfile, gender: onboardingGender } = useVibe();
+
+  const defaultFilter: GenderFilter =
+    onboardingGender === "male" ? "male" :
+    onboardingGender === "female" ? "female" : "all";
+
+  const [genderFilter, setGenderFilter] = useState<GenderFilter>(defaultFilter);
 
   const maxPrice = priceSteps[priceIdx];
 
-  const filtered = styleItems.filter((item) => {
-    const catMatch = category === "All" || item.category === category.toLowerCase();
-    const budgetMatch = item.price <= maxPrice;
-    return catMatch && budgetMatch;
-  });
+  const filtered = useMemo(() => {
+    return styleItems.filter((item) => {
+      const catMatch = category === "All" || item.category === category.toLowerCase();
+      const budgetMatch = item.price <= maxPrice;
+      const genderMatch = genderFilter === "all" || item.gender === genderFilter || item.gender === "unisex";
+      return catMatch && budgetMatch && genderMatch;
+    });
+  }, [category, maxPrice, genderFilter]);
 
   const handleShare = (item: typeof styleItems[0]) => {
     const text = `Check out this ${item.name} by ${item.brand} — $${item.price}`;
@@ -31,7 +41,7 @@ export default function ShopPage() {
   };
 
   const handleShopNow = (item: typeof styleItems[0]) => {
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(`${item.brand} ${item.name} buy`)}`, "_blank");
+    window.open(item.affiliateUrl, "_blank");
   };
 
   return (
@@ -41,6 +51,23 @@ export default function ShopPage() {
         <h2 className="text-2xl font-semibold">
           {vibeProfile ? `${vibeProfile.name}'s Shop` : "VIBE Shop"}
         </h2>
+      </div>
+
+      {/* Gender Filter */}
+      <div className="flex gap-2 mb-4">
+        {(["all", "female", "male"] as GenderFilter[]).map((f) => (
+          <button
+            key={f}
+            onClick={() => setGenderFilter(f)}
+            className={`flex-1 py-2 rounded-lg font-mono text-[10px] tracking-widest border transition-colors ${
+              genderFilter === f
+                ? "bg-foreground text-background border-foreground"
+                : "text-muted-foreground border-border hover:border-foreground"
+            }`}
+          >
+            {f === "all" ? "ALL" : f === "female" ? "WOMEN" : "MEN"}
+          </button>
+        ))}
       </div>
 
       {/* Budget slider */}
@@ -83,7 +110,6 @@ export default function ShopPage() {
           <div key={item.id} className="border rounded-lg overflow-hidden bg-card group">
             <div className="aspect-[4/5] overflow-hidden relative">
               <img src={item.image} alt={item.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              {/* Shop Now overlay */}
               <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <Button size="sm" className="gap-1.5" onClick={() => handleShopNow(item)}>
                   <ExternalLink className="w-3.5 h-3.5" /> Shop Now
@@ -108,6 +134,7 @@ export default function ShopPage() {
           </div>
         ))}
       </div>
+
       {filtered.length === 0 && (
         <p className="text-center text-muted-foreground text-sm mt-12">No items match your filters.</p>
       )}
