@@ -1,4 +1,3 @@
-typescript
 export interface StyleItem {
   id: string;
   name: string;
