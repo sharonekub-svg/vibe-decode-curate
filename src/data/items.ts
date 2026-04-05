@@ -11,4 +11,17 @@ export interface StyleItem {
   affiliateUrl: string;
 }
 
-export const styleItems: StyleItem[] =;
+export const styleItems: StyleItem[] = [
+  {
+    id: "1",
+    name: "Oversized Hoodie",
+    brand: "ESSENTIALS",
+    price: 89,
+    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop",
+    category: "tops",
+    aesthetic: "Streetwear",
+    fit: "Oversized",
+    gender: "female",
+    affiliateUrl: "https://www.asos.com/search/?q=oversized+hoodie+women"
+  }
+];
