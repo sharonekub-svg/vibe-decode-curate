@@ -4,13 +4,11 @@ export interface StyleItem {
   brand: string;
   price: number;
   image: string;
-  category: "tops" | "bottoms" | "kicks" | "accessories" | "outerwear" | "dresses";
+  category: string;
   aesthetic: string;
   fit: string;
-  gender: "male" | "female" | "unisex";
+  gender: string;
   affiliateUrl: string;
 }
 
 export const styleItems: StyleItem[] =;
- 
- 
